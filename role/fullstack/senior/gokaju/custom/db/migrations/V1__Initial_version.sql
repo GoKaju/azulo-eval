@@ -1,6 +1,5 @@
 
-CREATE DATABASE IF NOT EXISTS airport; -- Create the working database
-CREATE DATABASE IF NOT EXISTS directus; -- Create the Directus database
+CREATE DATABASE IF NOT EXISTS ${DATABASE}; -- Create the working database
 
 CREATE TABLE airport.Location (
     id INT AUTO_INCREMENT PRIMARY KEY,

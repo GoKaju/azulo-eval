@@ -6,7 +6,9 @@ services:
     restart: unless-stopped
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: rootP@ssw0rd
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
     ports:
       - 3306:3306
     volumes:
@@ -15,7 +17,11 @@ services:
   flyway:
     image: flyway/flyway:9.3
     restart: "no"
-    command: -url=jdbc:mysql://db -schemas=airport -user=root -password=rootP@ssw0rd -connectRetries=60 migrate
+    command: -url=jdbc:mysql://db -schemas=airport -user=${DB_USERNAME} -password=${DB_PASSWORD} -connectRetries=60 migrate
+    environment:
+      - FLYWAY_PLACEHOLDERS_DATABASE=${DB_DATABASE}
+    env_file:
+      - .env
     volumes:
       - ./custom/db/migrations:/flyway/sql
     depends_on:
@@ -26,8 +32,6 @@ services:
     restart: unless-stopped
     ports:
       - 8055:8055
-    volumes:
-      - ./custom/directus/uploads:/directus/uploads
     depends_on:
       - db
       - flyway
@@ -35,13 +39,15 @@ services:
       DB_CLIENT: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: airport
-      DB_USER: root
-      DB_PASSWORD: rootP@ssw0rd
-      ADMIN_EMAIL: admin@email.com
-      ADMIN_PASSWORD: d1r3ctu5P@ssw0rd
-      KEY: "255d861b-5ea1-5996-9aa3-922530ec40b1"
-      SECRET: "6116487b-cda1-52c2-b5b5-c8022c45e263"
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+    env_file:
+      - .env
 
   api:
     build: ./packages/airportart-api/
@@ -51,9 +57,11 @@ services:
     environment:
       - PORT=80
       - DB_HOST=db
-      - DB_NAME=airport
-      - DB_USER=root
-      - DB_PASSWORD=rootP@ssw0rd
+      - DB_NAME=${DB_DATABASE}
+      - DB_USER=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
     depends_on:
       - db
 
@@ -62,8 +70,6 @@ services:
     restart: unless-stopped
     ports:
       - 3001:80
-    environment:
-      - API_URL=http://localhost:3000
     depends_on:
       - api
 

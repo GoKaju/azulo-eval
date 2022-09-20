@@ -6,4 +6,15 @@ export class HttpService implements Api {
     const response = await fetch(`${API_URL}${path}`);
     return response.json();
   }
+
+  async post(path: string, body: any) {
+    const response = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.json();
+  }
 }
